@@ -1,0 +1,116 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * {
+    @apply border-ink;
+  }
+
+  html {
+    @apply scroll-smooth;
+  }
+
+  body {
+    @apply bg-cream text-ink font-sans;
+  }
+
+  ::-webkit-scrollbar {
+    width: 0px;
+    background: transparent;
+  }
+}
+
+@layer components {
+  .pixel-border {
+    @apply border-[2px] border-ink rounded-card;
+  }
+
+  .pixel-card {
+    @apply pixel-border shadow-pixel bg-surface-raised;
+  }
+
+  .pixel-card-inset {
+    @apply border-[2px] border-ink rounded-card shadow-inset bg-surface-inset;
+  }
+
+  .pixel-btn {
+    @apply pixel-border px-6 py-3 font-mono font-bold text-sm uppercase tracking-wider
+           rounded-btn transition-all duration-100
+           active:shadow-none active:translate-x-[2px] active:translate-y-[2px]
+           hover:shadow-pixel-lg;
+  }
+
+  .pixel-btn-primary {
+    @apply pixel-btn bg-copper text-white;
+  }
+
+  .pixel-btn-secondary {
+    @apply pixel-btn bg-surface-raised text-ink;
+  }
+
+  .pixel-btn-danger {
+    @apply pixel-btn bg-red-700 text-white;
+  }
+
+  .pixel-btn-success {
+    @apply pixel-btn bg-sage text-white;
+  }
+
+  .pixel-btn-ghost {
+    @apply pixel-btn border-transparent bg-transparent text-ink-light
+           hover:text-ink hover:shadow-pixel-sm;
+  }
+
+  .pixel-heading {
+    @apply font-mono font-bold uppercase tracking-tight;
+  }
+
+  .pixel-badge {
+    @apply pixel-border px-3 py-1 font-mono text-xs uppercase bg-cream-dark rounded-badge;
+  }
+
+  .pixel-badge-copper {
+    @apply pixel-border px-3 py-1 font-mono text-xs uppercase bg-copper text-white rounded-badge;
+  }
+
+  .pixel-input {
+    @apply pixel-border px-4 py-3 font-mono text-sm bg-surface-raised
+           focus:outline-none focus:shadow-pixel focus:border-ink rounded-card;
+  }
+
+  .pixel-tag {
+    @apply inline-block px-2 py-0.5 text-[10px] font-mono uppercase
+           bg-cream-dark border-[1px] border-ink rounded-badge text-ink-light;
+  }
+
+  /* Card Stack Styles */
+  .card-stack {
+    @apply relative;
+  }
+
+  .card-stack-back {
+    @apply absolute inset-0 rounded-card bg-surface-inset border-[2px] border-ink
+           transition-all duration-300;
+  }
+
+  .card-stack-middle {
+    @apply absolute inset-0 rounded-card bg-surface bg-surface-inset border-[2px] border-ink
+           transition-all duration-300;
+  }
+
+  .card-stack-front {
+    @apply relative rounded-card bg-surface-raised border-[2px] border-ink shadow-pixel
+           transition-all duration-300;
+  }
+}
+
+@layer utilities {
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+}
