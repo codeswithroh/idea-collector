@@ -10,7 +10,6 @@ import {
   ChevronUp,
   ChevronDown,
   X,
-  Building2,
   Sparkles,
 } from "lucide-react";
 
@@ -32,9 +31,6 @@ interface IdeaCardProps {
   onReject: (idea: Idea) => void;
   onNext: () => void;
   onPrev: () => void;
-  isActive: boolean;
-  stackIndex?: number;
-  totalInStack?: number;
 }
 
 function isFocusableInteractive(el: HTMLElement): boolean {
@@ -52,9 +48,6 @@ export default function IdeaCard({
   onReject,
   onNext,
   onPrev,
-  isActive,
-  stackIndex = 0,
-  totalInStack = 1,
 }: IdeaCardProps) {
   const [startX, setStartX] = useState(0);
   const [startY, setStartY] = useState(0);
@@ -81,7 +74,6 @@ export default function IdeaCard({
 
   const handleTouchStart = useCallback(
     (e: React.TouchEvent | React.MouseEvent) => {
-      if (!isActive) return;
       const clientX = "touches" in e ? e.touches[0].clientX : e.clientX;
       const clientY = "touches" in e ? e.touches[0].clientY : e.clientY;
       setStartX(clientX);
@@ -92,12 +84,12 @@ export default function IdeaCard({
       setSwipeDirection(null);
       isMouseDown.current = true;
     },
-    [isActive]
+    []
   );
 
   const handleTouchMove = useCallback(
     (e: React.TouchEvent | React.MouseEvent) => {
-      if (!isActive || !isMouseDown.current) return;
+      if (!isMouseDown.current) return;
       const clientX = "touches" in e ? e.touches[0].clientX : e.clientX;
       const clientY = "touches" in e ? e.touches[0].clientY : e.clientY;
       const dx = clientX - startX;
@@ -118,12 +110,12 @@ export default function IdeaCard({
         setSwipeDirection(null);
       }
     },
-    [startX, startY, isActive]
+    [startX, startY]
   );
 
   const handleTouchEnd = useCallback(() => {
     isMouseDown.current = false;
-    if (!isActive || !swiping) {
+    if (!swiping) {
       setOffsetX(0);
       setOffsetY(0);
       setSwiping(false);
@@ -169,10 +161,10 @@ export default function IdeaCard({
     setOffsetY(0);
     setSwiping(false);
     setSwipeDirection(null);
-  }, [offsetX, offsetY, swiping, isActive, onAccept, onReject, onNext, onPrev, idea]);
+  }, [offsetX, offsetY, swiping, onAccept, onReject, onNext, onPrev, idea]);
 
   useEffect(() => {
-    if (!isActive || !cardRef.current) return;
+    if (!cardRef.current) return;
     const card = cardRef.current;
 
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -214,11 +206,9 @@ export default function IdeaCard({
 
     card.addEventListener("keydown", handleKeyDown);
     return () => card.removeEventListener("keydown", handleKeyDown);
-  }, [isActive, onAccept, onReject, onNext, onPrev, idea]);
+  }, [onAccept, onReject, onNext, onPrev, idea]);
 
   const getCardStyle = () => {
-    if (!isActive) return { opacity: 0, pointerEvents: "none" as const };
-
     const rotateX = offsetY * 0.02;
     const rotateY = offsetX * 0.02;
     const scale = 1 - Math.abs(offsetX) / 3000 - Math.abs(offsetY) / 3000;
@@ -247,50 +237,11 @@ export default function IdeaCard({
 
   const overlayOpacity = Math.min(Math.abs(offsetX) / SWIPE_THRESHOLD, 1);
 
-  // For inactive cards in stack, show them behind with progressive styling
-  if (!isActive && totalInStack > 1) {
-    const positionFromBack = totalInStack - stackIndex - 1;
-    const scale = 1 - positionFromBack * 0.04;
-    const translateY = -positionFromBack * 12;
-    const opacity = 1 - positionFromBack * 0.25;
-    const zIndex = stackIndex;
-
-    return (
-      <div
-        className="absolute inset-0 flex items-center justify-center p-4 sm:p-6 select-none"
-        style={{
-          transform: `scale(${scale}) translateY(${translateY}px)`,
-          opacity: Math.max(opacity, 0.2),
-          zIndex,
-          pointerEvents: "none",
-        }}
-      >
-        <div className="pixel-card w-full max-w-2xl bg-surface-inset overflow-hidden flex flex-col max-h-[90vh]">
-          <div className="pixel-border border-t-0 border-x-0 p-4 sm:p-6 bg-surface flex items-start justify-between gap-4">
-            <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-2 mb-2 flex-wrap">
-                <span className="pixel-badge text-xs">{idea.event}</span>
-              </div>
-              <h2 className="pixel-heading text-xl sm:text-2xl leading-tight break-words text-ink-muted">
-                {idea.title}
-              </h2>
-            </div>
-          </div>
-          <div className="flex-1 p-4 sm:p-6">
-            <p className="text-sm leading-relaxed text-ink-muted line-clamp-3">
-              {idea.description}
-            </p>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div
       ref={cardRef}
       tabIndex={0}
-      className="absolute inset-0 flex items-center justify-center p-4 sm:p-6 select-none outline-none"
+      className="w-full h-full flex items-center justify-center select-none outline-none"
       onMouseDown={handleTouchStart}
       onMouseMove={handleTouchMove}
       onMouseUp={handleTouchEnd}
@@ -306,7 +257,7 @@ export default function IdeaCard({
       onTouchEnd={handleTouchEnd}
       style={getCardStyle()}
     >
-      <div className="pixel-card w-full max-w-2xl bg-surface-raised overflow-hidden relative flex flex-col max-h-[90vh]">
+      <div className="w-full h-full border-[2px] border-ink rounded-card bg-surface-raised overflow-hidden relative flex flex-col shadow-pixel">
         {/* Swipe Overlays */}
         <div
           className={cn(
@@ -337,12 +288,12 @@ export default function IdeaCard({
         </div>
 
         {/* Header */}
-        <div className="pixel-border border-t-0 border-x-0 p-4 sm:p-6 flex items-start justify-between gap-4 bg-surface">
+        <div className="border-b-[2px] border-ink p-4 sm:p-5 flex items-start justify-between gap-4 bg-surface shrink-0">
           <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-2 mb-2 flex-wrap">
+            <div className="flex items-center gap-2 mb-1 flex-wrap">
               <span className="pixel-badge-copper">{idea.event}</span>
             </div>
-            <h2 className="pixel-heading text-xl sm:text-2xl lg:text-3xl leading-tight break-words">
+            <h2 className="pixel-heading text-lg sm:text-xl lg:text-2xl leading-tight break-words">
               {idea.title}
             </h2>
           </div>
@@ -358,7 +309,7 @@ export default function IdeaCard({
         </div>
 
         {/* Content */}
-        <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4">
+        <div className="flex-1 overflow-y-auto p-4 sm:p-5 space-y-4">
           <p className="text-sm sm:text-base leading-relaxed text-ink-light">
             {idea.description}
           </p>
@@ -402,7 +353,7 @@ export default function IdeaCard({
         </div>
 
         {/* Bottom Actions */}
-        <div className="pixel-border border-b-0 border-x-0 p-4 sm:p-6 bg-surface">
+        <div className="border-t-[2px] border-ink p-4 sm:p-5 bg-surface shrink-0">
           <div className="flex items-center justify-between gap-3">
             <button
               onClick={() => {
@@ -422,7 +373,6 @@ export default function IdeaCard({
                   onPrev();
                 }}
                 className="pixel-btn-ghost p-1"
-                disabled={!isActive}
               >
                 <ChevronUp className="w-5 h-5" />
               </button>
@@ -432,7 +382,6 @@ export default function IdeaCard({
                   onNext();
                 }}
                 className="pixel-btn-ghost p-1"
-                disabled={!isActive}
               >
                 <ChevronDown className="w-5 h-5" />
               </button>

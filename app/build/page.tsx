@@ -36,19 +36,19 @@ const statusConfig = {
     label: "Not Started",
     icon: Circle,
     color: "bg-surface-raised",
-    borderColor: "border-ink",
+    textColor: "text-ink",
   },
   building: {
     label: "Building",
     icon: Clock,
     color: "bg-copper",
-    borderColor: "border-ink",
+    textColor: "text-white",
   },
   built: {
     label: "Shipped",
     icon: Rocket,
     color: "bg-sage",
-    borderColor: "border-ink",
+    textColor: "text-white",
   },
 };
 
@@ -307,10 +307,7 @@ export default function BuildPage() {
                       {/* Card Header */}
                       <div className="pixel-border border-t-0 border-x-0 p-4 bg-surface flex items-start justify-between gap-2">
                         <div className="flex-1 min-w-0">
-                          <span className="font-mono text-xs text-ink-muted">
-                            {item.idea.event}
-                          </span>
-                          <h3 className="pixel-heading text-sm mt-1 break-words text-ink">
+                          <h3 className="pixel-heading text-sm break-words text-ink">
                             {item.idea.title}
                           </h3>
                         </div>
@@ -363,8 +360,8 @@ export default function BuildPage() {
                                 onClick={() => updateStatus(item.ideaId, item.source || item.idea.source, statusKey)}
                                 className={`font-mono text-xs flex-1 flex items-center justify-center gap-1 py-2 rounded-btn border-[2px] transition-all duration-100 ${
                                   isActive
-                                    ? `${config.color} text-white shadow-pixel-sm border-ink`
-                                    : "bg-surface-raised text-ink border-transparent hover:border-ink"
+                                    ? `${config.color} ${config.textColor} shadow-pixel-sm border-ink`
+                                    : "bg-surface-raised text-ink border-ink hover:bg-surface"
                                 }`}
                               >
                                 <Icon className="w-3 h-3" />

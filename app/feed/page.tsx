@@ -27,7 +27,6 @@ export default function FeedPage() {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const [swipeDirection, setSwipeDirection] = useState<"left" | "right" | null>(null);
   const [acceptedCount, setAcceptedCount] = useState(0);
   const [rejectedCount, setRejectedCount] = useState(0);
 
@@ -87,8 +86,6 @@ export default function FeedPage() {
 
   const handleAccept = useCallback(
     async (idea: Idea) => {
-      setSwipeDirection("right");
-
       try {
         const response = await fetch("/api/accept", {
           method: "POST",
@@ -113,27 +110,18 @@ export default function FeedPage() {
         }
         saveToLocalStorage("accepted_ideas", { id: idea.id, source: idea.source });
         setAcceptedCount((c) => c + 1);
-        setTimeout(() => {
-          setSwipeDirection(null);
-          setCurrentIndex((prev) => prev + 1);
-        }, 300);
+        setCurrentIndex((prev) => prev + 1);
       } catch (e) {
         console.error("Failed to save to MongoDB:", e);
-        setSwipeDirection(null);
       }
     },
     []
   );
 
   const handleReject = useCallback((idea: Idea) => {
-    setSwipeDirection("left");
     saveToLocalStorage("rejected_ideas", { id: idea.id, source: idea.source });
     setRejectedCount((c) => c + 1);
-
-    setTimeout(() => {
-      setSwipeDirection(null);
-      setCurrentIndex((prev) => prev + 1);
-    }, 300);
+    setCurrentIndex((prev) => prev + 1);
   }, []);
 
   const handleNext = useCallback(() => {
@@ -182,11 +170,11 @@ export default function FeedPage() {
   }
 
   const currentIdea = ideas[currentIndex];
-  const hasMore = currentIndex < ideas.length - 1;
   const isFinished = !currentIdea && ideas.length > 0;
+  const isEmpty = ideas.length === 0;
 
-  // Get up to 3 next ideas for the stack effect
-  const stackIdeas = ideas.slice(currentIndex, currentIndex + 4);
+  // Get up to 3 next ideas for the stack back
+  const backIdeas = ideas.slice(currentIndex + 1, currentIndex + 4);
 
   return (
     <div className="min-h-screen bg-cream overflow-hidden">
@@ -218,82 +206,69 @@ export default function FeedPage() {
         </div>
 
         {/* Main Feed - Card Stack */}
-        <main className="pt-24 h-screen relative">
-          {isFinished ? (
-            <div className="h-full flex items-center justify-center">
-              <div className="pixel-card p-8 max-w-md text-center bg-surface-raised">
-                <Sparkles className="w-16 h-16 mx-auto mb-4 text-copper" />
-                <h2 className="pixel-heading text-2xl mb-4">
-                  All Ideas Viewed!
-                </h2>
-                <p className="text-sm mb-2 text-ink-light">
-                  You&apos;ve gone through {ideas.length} ideas.
-                </p>
-                <p className="text-sm mb-6">
-                  <span className="font-bold text-sage">{acceptedCount}</span>{" "}
-                  ideas saved to your Build List.
-                </p>
-                <div className="flex flex-col gap-3">
-                  <a href="/build" className="pixel-btn-primary block">
-                    View Build List
-                  </a>
-                  <button onClick={handleReset} className="pixel-btn-secondary">
-                    Start Over (Clear History)
-                  </button>
-                </div>
+        <main className="pt-24 h-screen flex items-center justify-center px-4 sm:px-6">
+          {isFinished || isEmpty ? (
+            <div className="pixel-card p-8 max-w-md text-center bg-surface-raised">
+              <Sparkles className="w-16 h-16 mx-auto mb-4 text-copper" />
+              <h2 className="pixel-heading text-2xl mb-4">
+                {isFinished ? "All Ideas Viewed!" : "No New Ideas"}
+              </h2>
+              <p className="text-sm mb-2 text-ink-light">
+                You&apos;ve gone through {ideas.length} ideas.
+              </p>
+              <p className="text-sm mb-6">
+                <span className="font-bold text-sage">{acceptedCount}</span>{" "}
+                ideas saved to your Build List.
+              </p>
+              <div className="flex flex-col gap-3">
+                <a href="/build" className="pixel-btn-primary block">
+                  View Build List
+                </a>
+                <button onClick={handleReset} className="pixel-btn-secondary">
+                  Start Over (Clear History)
+                </button>
               </div>
             </div>
           ) : currentIdea ? (
-            <div className="relative h-full w-full">
-              {/* Card Stack */}
-              {stackIdeas.slice(1).reverse().map((stackIdea, idx) => (
+            <div className="relative w-full max-w-2xl h-[75vh] sm:h-[80vh]">
+              {/* Stack backs - simplified card stubs peeking from behind */}
+              {backIdeas.map((backIdea, idx) => {
+                const depth = backIdeas.length - idx; // 1 = closest behind, 2 = further, etc.
+                const scale = 1 - depth * 0.03;
+                const translateY = depth * 10;
+                const opacity = 1 - depth * 0.25;
+
+                return (
+                  <div
+                    key={`${backIdea.source}:${backIdea.id}`}
+                    className="absolute inset-0 flex items-center justify-center"
+                    style={{
+                      transform: `scale(${scale}) translateY(-${translateY}px)`,
+                      opacity: Math.max(opacity, 0.3),
+                      zIndex: -depth,
+                      pointerEvents: "none",
+                    }}
+                  >
+                    {/* Card stub - only top edge visible, no content */}
+                    <div
+                      className="w-full h-full border-[2px] border-ink rounded-card bg-surface-inset overflow-hidden"
+                    >
+                      {/* Just a dark header bar showing it's a card behind */}
+                      <div className="h-12 bg-surface border-b-[2px] border-ink" />
+                    </div>
+                  </div>
+                );
+              })}
+
+              {/* Active Card */}
+              <div className="absolute inset-0 z-10">
                 <IdeaCard
-                  key={`${stackIdea.source}:${stackIdea.id}`}
-                  idea={stackIdea}
+                  idea={currentIdea}
                   onAccept={handleAccept}
                   onReject={handleReject}
                   onNext={handleNext}
                   onPrev={handlePrev}
-                  isActive={false}
-                  stackIndex={idx + 1}
-                  totalInStack={stackIdeas.length}
                 />
-              ))}
-              {/* Active Card */}
-              <IdeaCard
-                key={`${currentIdea.source}:${currentIdea.id}`}
-                idea={currentIdea}
-                onAccept={handleAccept}
-                onReject={handleReject}
-                onNext={handleNext}
-                onPrev={handlePrev}
-                isActive={true}
-                stackIndex={0}
-                totalInStack={stackIdeas.length}
-              />
-            </div>
-          ) : ideas.length === 0 ? (
-            <div className="h-full flex items-center justify-center">
-              <div className="pixel-card p-8 max-w-md text-center bg-surface-raised">
-                <Sparkles className="w-16 h-16 mx-auto mb-4 text-copper" />
-                <h2 className="pixel-heading text-2xl mb-4">
-                  No New Ideas
-                </h2>
-                <p className="text-sm mb-2 text-ink-light">
-                  You&apos;ve seen all available ideas.
-                </p>
-                <p className="text-sm mb-6">
-                  <span className="font-bold text-sage">{acceptedCount}</span>{" "}
-                  ideas saved to your Build List.
-                </p>
-                <div className="flex flex-col gap-3">
-                  <a href="/build" className="pixel-btn-primary block">
-                    View Build List
-                  </a>
-                  <button onClick={handleReset} className="pixel-btn-secondary">
-                    Start Over (Clear History)
-                  </button>
-                </div>
               </div>
             </div>
           ) : null}
