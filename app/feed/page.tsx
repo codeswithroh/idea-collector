@@ -230,31 +230,38 @@ export default function FeedPage() {
               </div>
             </div>
           ) : currentIdea ? (
-            <div className="relative w-full max-w-2xl h-[75vh] sm:h-[80vh]">
-              {/* Stack backs - simplified card stubs peeking from behind */}
+            <div
+              className="relative w-full max-w-2xl h-[75vh] sm:h-[80vh]"
+              style={{ perspective: "900px", transformStyle: "preserve-3d" }}
+            >
+              {/* 3D Stack backs with depth rotation */}
               {backIdeas.map((backIdea, idx) => {
-                const depth = backIdeas.length - idx; // 1 = closest behind, 2 = further, etc.
-                const scale = 1 - depth * 0.03;
-                const translateY = depth * 10;
-                const opacity = 1 - depth * 0.25;
+                const depth = backIdeas.length - idx;
+                const scale = 1 - depth * 0.04;
+                const translateY = depth * 12;
+                const opacity = 1 - depth * 0.3;
+                const rotateX = depth * 2;
+                const rotateY = (depth % 2 === 0 ? 1 : -1) * depth * 3;
+                const rotateZ = (depth % 2 === 0 ? -1 : 1) * depth * 1.5;
 
                 return (
                   <div
                     key={`${backIdea.source}:${backIdea.id}`}
                     className="absolute inset-0 flex items-center justify-center"
                     style={{
-                      transform: `scale(${scale}) translateY(-${translateY}px)`,
-                      opacity: Math.max(opacity, 0.3),
+                      transform: `scale(${scale}) translateY(-${translateY}px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) rotateZ(${rotateZ}deg)`,
+                      opacity: Math.max(opacity, 0.25),
                       zIndex: -depth,
                       pointerEvents: "none",
+                      transformStyle: "preserve-3d",
                     }}
                   >
-                    {/* Card stub - only top edge visible, no content */}
-                    <div
-                      className="w-full h-full border-[2px] border-ink rounded-card bg-surface-inset overflow-hidden"
-                    >
-                      {/* Just a dark header bar showing it's a card behind */}
-                      <div className="h-12 bg-surface border-b-[2px] border-ink" />
+                    <div className="w-full h-full border-[2px] border-ink/40 rounded-card bg-surface-inset overflow-hidden shadow-pixel">
+                      <div className="h-12 bg-surface border-b-[2px] border-ink/40" />
+                      <div className="p-4">
+                        <div className="h-3 bg-surface-inset rounded-badge w-3/4 mb-2" />
+                        <div className="h-3 bg-surface-inset rounded-badge w-1/2" />
+                      </div>
                     </div>
                   </div>
                 );
