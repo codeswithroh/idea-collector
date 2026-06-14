@@ -11,11 +11,20 @@ import {
   ChevronDown,
   X,
   Sparkles,
-  Tag,
-  Hash,
-  Globe,
   ChevronLeft,
   ChevronRight,
+  Hash,
+  Globe,
+  Layers,
+  Zap,
+  Award,
+  Lightbulb,
+  Code2,
+  Calendar,
+  ArrowUpRight,
+  Target,
+  CheckCircle2,
+  Circle,
 } from "lucide-react";
 
 interface Idea {
@@ -242,8 +251,14 @@ export default function IdeaCard({
 
   const overlayOpacity = Math.min(Math.abs(offsetX) / SWIPE_THRESHOLD, 1);
 
-  const accentColor = idea.source === "yc" ? "bg-ink" : "bg-copper";
-  const sourceLabel = idea.source === "yc" ? "YC IDEA" : "ETHGLOBAL";
+  const isYc = idea.source === "yc";
+  const accentColor = isYc ? "bg-ink" : "bg-copper";
+  const accentText = isYc ? "text-white" : "text-white";
+  const sourceLabel = isYc ? "YC IDEA" : "ETHGLOBAL";
+  const sourceName = isYc ? "Y Combinator" : "ETHGlobal";
+
+  const hasPrizes = idea.project_prizes && idea.project_prizes.length > 0;
+  const hasCategories = idea.categories && idea.categories.length > 0;
 
   return (
     <div
@@ -265,25 +280,26 @@ export default function IdeaCard({
       onTouchEnd={handleTouchEnd}
       style={getCardStyle()}
     >
-      {/* Side swipe indicators */}
-      <div className="absolute left-2 top-1/2 -translate-y-1/2 z-10 pointer-events-none opacity-40">
-        <div className="flex flex-col items-center gap-1 text-ink-muted">
-          <ChevronLeft className="w-6 h-6" />
-          <span className="font-mono text-[10px] uppercase tracking-wider rotate-[-90deg] origin-center whitespace-nowrap">Skip</span>
+      {/* ===== SIDE SWIPE INDICATORS ===== */}
+      <div className="absolute left-1 top-1/2 -translate-y-1/2 z-30 pointer-events-none">
+        <div className="flex flex-col items-center gap-2 px-2 py-4 rounded-badge bg-red-700/10 border border-red-700/20 text-red-700">
+          <ChevronLeft className="w-5 h-5" />
+          <span className="font-mono text-[9px] font-bold uppercase tracking-widest rotate-[-90deg] origin-center whitespace-nowrap">Skip</span>
         </div>
       </div>
-      <div className="absolute right-2 top-1/2 -translate-y-1/2 z-10 pointer-events-none opacity-40">
-        <div className="flex flex-col items-center gap-1 text-ink-muted">
-          <ChevronRight className="w-6 h-6" />
-          <span className="font-mono text-[10px] uppercase tracking-wider rotate-90 origin-center whitespace-nowrap">Build</span>
+      <div className="absolute right-1 top-1/2 -translate-y-1/2 z-30 pointer-events-none">
+        <div className="flex flex-col items-center gap-2 px-2 py-4 rounded-badge bg-copper/10 border border-copper/20 text-copper">
+          <ChevronRight className="w-5 h-5" />
+          <span className="font-mono text-[9px] font-bold uppercase tracking-widest rotate-90 origin-center whitespace-nowrap">Build</span>
         </div>
       </div>
 
-      <div className="w-full h-full border-[2px] border-ink rounded-card bg-surface-raised overflow-hidden relative flex flex-col shadow-pixel">
+      {/* ===== CARD ===== */}
+      <div className="mx-auto max-w-xl w-full border-[2px] border-ink rounded-card bg-surface-raised overflow-hidden shadow-pixel flex flex-col max-h-[85vh]">
         {/* Swipe Overlays */}
         <div
           className={cn(
-            "absolute inset-0 z-20 flex items-center justify-center pointer-events-none",
+            "absolute inset-0 z-20 flex items-center justify-center pointer-events-none rounded-card",
             swipeDirection === "right" && swiping ? "flex" : "hidden"
           )}
           style={{ opacity: overlayOpacity }}
@@ -294,10 +310,9 @@ export default function IdeaCard({
             </span>
           </div>
         </div>
-
         <div
           className={cn(
-            "absolute inset-0 z-20 flex items-center justify-center pointer-events-none",
+            "absolute inset-0 z-20 flex items-center justify-center pointer-events-none rounded-card",
             swipeDirection === "left" && swiping ? "flex" : "hidden"
           )}
           style={{ opacity: overlayOpacity }}
@@ -309,47 +324,69 @@ export default function IdeaCard({
           </div>
         </div>
 
-        {/* Decorative Accent Bar */}
-        <div className={`h-2 ${accentColor} w-full`} />
-
-        {/* Header */}
-        <div className="border-b-[2px] border-ink p-4 sm:p-5 flex items-start justify-between gap-4 bg-surface shrink-0">
-          <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-2 mb-2 flex-wrap">
-              <span className="pixel-badge-copper">{idea.event}</span>
-              <span className="pixel-tag text-[10px] py-0.5">{sourceLabel}</span>
+        {/* ===== COVER HEADER ===== */}
+        <div className={`${accentColor} p-4 sm:p-5 relative overflow-hidden`}>
+          {/* Decorative pattern */}
+          <div className="absolute inset-0 opacity-10">
+            <svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
+              <defs>
+                <pattern id="dots" x="0" y="0" width="20" height="20" patternUnits="userSpaceOnUse">
+                  <circle cx="2" cy="2" r="1" fill="white" />
+                </pattern>
+              </defs>
+              <rect width="100%" height="100%" fill="url(#dots)" />
+            </svg>
+          </div>
+          <div className="relative z-10">
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center gap-2">
+                <span className="bg-white/20 backdrop-blur-sm border border-white/30 px-3 py-1 rounded-badge font-mono text-xs font-bold text-white uppercase tracking-wider">
+                  {idea.event}
+                </span>
+                <span className="bg-white/20 backdrop-blur-sm border border-white/30 px-2 py-0.5 rounded-badge font-mono text-[10px] font-bold text-white uppercase">
+                  {sourceLabel}
+                </span>
+              </div>
+              <a
+                href={idea.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-8 h-8 bg-white/20 backdrop-blur-sm border border-white/30 rounded-badge flex items-center justify-center hover:bg-white/30 transition-colors"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <ArrowUpRight className="w-4 h-4 text-white" />
+              </a>
             </div>
-            <h2 className="pixel-heading text-lg sm:text-xl lg:text-2xl leading-tight break-words">
+            <h2 className="font-mono font-bold text-lg sm:text-xl lg:text-2xl text-white leading-tight break-words">
               {idea.title}
             </h2>
           </div>
-          <a
-            href={idea.url}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="pixel-btn-ghost p-2 flex-shrink-0"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <ExternalLink className="w-5 h-5" />
-          </a>
         </div>
 
-        {/* Content */}
+        {/* ===== CONTENT BODY ===== */}
         <div className="flex-1 overflow-y-auto p-4 sm:p-5 space-y-4">
-          <p className="text-sm sm:text-base leading-relaxed text-ink-light">
-            {idea.description}
-          </p>
+          {/* Description */}
+          <div className="bg-cream border-[2px] border-ink rounded-card p-4">
+            <p className="text-sm sm:text-base leading-relaxed text-ink">
+              {idea.description}
+            </p>
+          </div>
 
           {/* Prizes */}
-          {idea.project_prizes && idea.project_prizes.length > 0 && (
+          {hasPrizes && (
             <div className="space-y-2">
-              <h3 className="font-mono text-xs uppercase font-bold flex items-center gap-2 text-ink">
+              <div className="flex items-center gap-2">
                 <Trophy className="w-4 h-4 text-copper" />
-                Prizes Won
-              </h3>
+                <span className="font-mono text-xs font-bold uppercase tracking-wider text-ink">
+                  Prizes Won
+                </span>
+              </div>
               <div className="flex flex-wrap gap-2">
-                {idea.project_prizes.map((prize, i) => (
-                  <span key={i} className="pixel-badge-copper">
+                {idea.project_prizes!.map((prize, i) => (
+                  <span
+                    key={i}
+                    className="bg-copper/10 border-[2px] border-copper/30 px-3 py-1.5 rounded-badge font-mono text-xs font-bold text-copper"
+                  >
                     {prize.name}
                   </span>
                 ))}
@@ -358,15 +395,20 @@ export default function IdeaCard({
           )}
 
           {/* Categories */}
-          {idea.categories && idea.categories.length > 0 && (
+          {hasCategories && (
             <div className="space-y-2">
-              <h3 className="font-mono text-xs uppercase font-bold flex items-center gap-2 text-ink">
-                <Tag className="w-4 h-4 text-copper" />
-                Categories
-              </h3>
+              <div className="flex items-center gap-2">
+                <Code2 className="w-4 h-4 text-ink-light" />
+                <span className="font-mono text-xs font-bold uppercase tracking-wider text-ink">
+                  Categories
+                </span>
+              </div>
               <div className="flex flex-wrap gap-2">
-                {idea.categories.map((cat, i) => (
-                  <span key={i} className="pixel-tag">
+                {idea.categories!.map((cat, i) => (
+                  <span
+                    key={i}
+                    className="bg-surface-inset border-[2px] border-ink/20 px-3 py-1.5 rounded-badge font-mono text-xs text-ink-light"
+                  >
                     {cat}
                   </span>
                 ))}
@@ -374,51 +416,58 @@ export default function IdeaCard({
             </div>
           )}
 
-          {/* Meta Info Bar */}
-          <div className="flex items-center gap-3 pt-2 border-t-[2px] border-ink/10">
-            <div className="flex items-center gap-1.5 text-xs font-mono text-ink-muted">
-              <Hash className="w-3.5 h-3.5" />
-              <span>ID #{idea.id}</span>
+          {/* Quick Info Row */}
+          <div className="grid grid-cols-3 gap-2">
+            <div className="bg-surface border-[2px] border-ink/20 rounded-card p-2 text-center">
+              <Hash className="w-4 h-4 mx-auto mb-1 text-ink-muted" />
+              <p className="font-mono text-[10px] text-ink-muted uppercase">ID</p>
+              <p className="font-mono text-xs font-bold text-ink">#{idea.id}</p>
             </div>
-            <div className="flex items-center gap-1.5 text-xs font-mono text-ink-muted">
-              <Globe className="w-3.5 h-3.5" />
-              <span>{idea.source === "yc" ? "Y Combinator" : "ETHGlobal"}</span>
+            <div className="bg-surface border-[2px] border-ink/20 rounded-card p-2 text-center">
+              <Globe className="w-4 h-4 mx-auto mb-1 text-ink-muted" />
+              <p className="font-mono text-[10px] text-ink-muted uppercase">Source</p>
+              <p className="font-mono text-xs font-bold text-ink">{sourceName}</p>
+            </div>
+            <div className="bg-surface border-[2px] border-ink/20 rounded-card p-2 text-center">
+              <Target className="w-4 h-4 mx-auto mb-1 text-ink-muted" />
+              <p className="font-mono text-[10px] text-ink-muted uppercase">Event</p>
+              <p className="font-mono text-xs font-bold text-ink truncate">{idea.event}</p>
             </div>
           </div>
         </div>
 
-        {/* Bottom Actions */}
-        <div className="border-t-[2px] border-ink p-4 sm:p-5 bg-surface shrink-0">
-          <div className="flex items-center justify-between gap-3">
+        {/* ===== BOTTOM ACTIONS ===== */}
+        <div className="border-t-[2px] border-ink p-3 sm:p-4 bg-surface shrink-0">
+          <div className="flex items-center gap-2">
             <button
               onClick={() => {
                 if (!canNavigate()) return;
                 onReject(idea);
               }}
-              className="pixel-btn-danger flex-1 flex items-center justify-center gap-2"
+              className="flex-1 flex items-center justify-center gap-2 py-3 px-4 bg-red-700 text-white border-[2px] border-ink rounded-btn font-mono font-bold text-xs uppercase tracking-wider shadow-pixel-sm active:shadow-none active:translate-x-[2px] active:translate-y-[2px] transition-all hover:bg-red-800"
             >
-              <X className="w-5 h-5" />
+              <X className="w-4 h-4" />
               <span className="hidden sm:inline">Skip</span>
             </button>
 
-            <div className="flex flex-col items-center gap-1">
+            <div className="flex flex-col gap-1">
               <button
                 onClick={() => {
                   if (!canNavigate()) return;
                   onPrev();
                 }}
-                className="pixel-btn-ghost p-1"
+                className="w-8 h-8 flex items-center justify-center bg-surface-raised border-[2px] border-ink rounded-btn text-ink hover:bg-surface active:shadow-none active:translate-x-[1px] active:translate-y-[1px] shadow-pixel-sm transition-all"
               >
-                <ChevronUp className="w-5 h-5" />
+                <ChevronUp className="w-4 h-4" />
               </button>
               <button
                 onClick={() => {
                   if (!canNavigate()) return;
                   onNext();
                 }}
-                className="pixel-btn-ghost p-1"
+                className="w-8 h-8 flex items-center justify-center bg-surface-raised border-[2px] border-ink rounded-btn text-ink hover:bg-surface active:shadow-none active:translate-x-[1px] active:translate-y-[1px] shadow-pixel-sm transition-all"
               >
-                <ChevronDown className="w-5 h-5" />
+                <ChevronDown className="w-4 h-4" />
               </button>
             </div>
 
@@ -427,9 +476,9 @@ export default function IdeaCard({
                 if (!canNavigate()) return;
                 onAccept(idea);
               }}
-              className="pixel-btn-success flex-1 flex items-center justify-center gap-2"
+              className="flex-1 flex items-center justify-center gap-2 py-3 px-4 bg-sage text-white border-[2px] border-ink rounded-btn font-mono font-bold text-xs uppercase tracking-wider shadow-pixel-sm active:shadow-none active:translate-x-[2px] active:translate-y-[2px] transition-all hover:bg-sage-dark"
             >
-              <Sparkles className="w-5 h-5" />
+              <Sparkles className="w-4 h-4" />
               <span className="hidden sm:inline">Build</span>
             </button>
           </div>
