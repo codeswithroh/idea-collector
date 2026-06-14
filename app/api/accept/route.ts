@@ -15,7 +15,7 @@ export async function POST(request: Request) {
 
     const ideaSource = source || idea?.source || "ethglobal";
 
-    const client = await clientPromise;
+    const client = await clientPromise();
     const db = client.db("IdeaCollector");
     const collection = db.collection("accepted_ideas");
 
@@ -107,7 +107,7 @@ export async function POST(request: Request) {
 
 export async function GET(request: Request) {
   try {
-    const client = await clientPromise;
+    const client = await clientPromise();
     const db = client.db("IdeaCollector");
     const collection = db.collection("accepted_ideas");
 
