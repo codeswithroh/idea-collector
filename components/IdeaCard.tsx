@@ -11,6 +11,11 @@ import {
   ChevronDown,
   X,
   Sparkles,
+  Tag,
+  Hash,
+  Globe,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react";
 
 interface Idea {
@@ -237,11 +242,14 @@ export default function IdeaCard({
 
   const overlayOpacity = Math.min(Math.abs(offsetX) / SWIPE_THRESHOLD, 1);
 
+  const accentColor = idea.source === "yc" ? "bg-ink" : "bg-copper";
+  const sourceLabel = idea.source === "yc" ? "YC IDEA" : "ETHGLOBAL";
+
   return (
     <div
       ref={cardRef}
       tabIndex={0}
-      className="w-full h-full flex items-center justify-center select-none outline-none"
+      className="w-full h-full flex items-center justify-center select-none outline-none relative"
       onMouseDown={handleTouchStart}
       onMouseMove={handleTouchMove}
       onMouseUp={handleTouchEnd}
@@ -257,6 +265,20 @@ export default function IdeaCard({
       onTouchEnd={handleTouchEnd}
       style={getCardStyle()}
     >
+      {/* Side swipe indicators */}
+      <div className="absolute left-2 top-1/2 -translate-y-1/2 z-10 pointer-events-none opacity-40">
+        <div className="flex flex-col items-center gap-1 text-ink-muted">
+          <ChevronLeft className="w-6 h-6" />
+          <span className="font-mono text-[10px] uppercase tracking-wider rotate-[-90deg] origin-center whitespace-nowrap">Skip</span>
+        </div>
+      </div>
+      <div className="absolute right-2 top-1/2 -translate-y-1/2 z-10 pointer-events-none opacity-40">
+        <div className="flex flex-col items-center gap-1 text-ink-muted">
+          <ChevronRight className="w-6 h-6" />
+          <span className="font-mono text-[10px] uppercase tracking-wider rotate-90 origin-center whitespace-nowrap">Build</span>
+        </div>
+      </div>
+
       <div className="w-full h-full border-[2px] border-ink rounded-card bg-surface-raised overflow-hidden relative flex flex-col shadow-pixel">
         {/* Swipe Overlays */}
         <div
@@ -287,11 +309,15 @@ export default function IdeaCard({
           </div>
         </div>
 
+        {/* Decorative Accent Bar */}
+        <div className={`h-2 ${accentColor} w-full`} />
+
         {/* Header */}
         <div className="border-b-[2px] border-ink p-4 sm:p-5 flex items-start justify-between gap-4 bg-surface shrink-0">
           <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-2 mb-1 flex-wrap">
+            <div className="flex items-center gap-2 mb-2 flex-wrap">
               <span className="pixel-badge-copper">{idea.event}</span>
+              <span className="pixel-tag text-[10px] py-0.5">{sourceLabel}</span>
             </div>
             <h2 className="pixel-heading text-lg sm:text-xl lg:text-2xl leading-tight break-words">
               {idea.title}
@@ -314,6 +340,7 @@ export default function IdeaCard({
             {idea.description}
           </p>
 
+          {/* Prizes */}
           {idea.project_prizes && idea.project_prizes.length > 0 && (
             <div className="space-y-2">
               <h3 className="font-mono text-xs uppercase font-bold flex items-center gap-2 text-ink">
@@ -330,24 +357,32 @@ export default function IdeaCard({
             </div>
           )}
 
-          {idea.categories && idea.categories.length > 0 && !idea.project_prizes?.length && (
-            <div className="flex flex-wrap gap-2">
-              {idea.categories.map((cat, i) => (
-                <span key={i} className="pixel-tag">
-                  {cat}
-                </span>
-              ))}
+          {/* Categories */}
+          {idea.categories && idea.categories.length > 0 && (
+            <div className="space-y-2">
+              <h3 className="font-mono text-xs uppercase font-bold flex items-center gap-2 text-ink">
+                <Tag className="w-4 h-4 text-copper" />
+                Categories
+              </h3>
+              <div className="flex flex-wrap gap-2">
+                {idea.categories.map((cat, i) => (
+                  <span key={i} className="pixel-tag">
+                    {cat}
+                  </span>
+                ))}
+              </div>
             </div>
           )}
 
-          {/* Action hint */}
-          <div className="pixel-card-inset p-3 space-y-2">
-            <p className="font-mono text-xs uppercase font-bold text-ink">Controls</p>
-            <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs font-mono text-ink-light">
-              <span className="flex items-center gap-1"><ArrowLeft className="w-3 h-3" /> Skip</span>
-              <span className="flex items-center gap-1"><ArrowRight className="w-3 h-3" /> Build</span>
-              <span className="flex items-center gap-1"><ChevronUp className="w-3 h-3" /> Prev</span>
-              <span className="flex items-center gap-1"><ChevronDown className="w-3 h-3" /> Next</span>
+          {/* Meta Info Bar */}
+          <div className="flex items-center gap-3 pt-2 border-t-[2px] border-ink/10">
+            <div className="flex items-center gap-1.5 text-xs font-mono text-ink-muted">
+              <Hash className="w-3.5 h-3.5" />
+              <span>ID #{idea.id}</span>
+            </div>
+            <div className="flex items-center gap-1.5 text-xs font-mono text-ink-muted">
+              <Globe className="w-3.5 h-3.5" />
+              <span>{idea.source === "yc" ? "Y Combinator" : "ETHGlobal"}</span>
             </div>
           </div>
         </div>

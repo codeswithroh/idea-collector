@@ -61,6 +61,33 @@ export async function POST(request: Request) {
       );
     }
 
+    // If still no match, try id field (old documents might use id instead of ideaId)
+    if (!shouldUpsert && result.matchedCount === 0) {
+      result = await collection.updateOne(
+        { id: ideaId },
+        {
+          $set: { ...updateSet, source: ideaSource },
+        }
+      );
+    }
+
+    // Try type coercion — MongoDB may have stored ideaId as a different type
+    if (!shouldUpsert && result.matchedCount === 0) {
+      const coercedId = typeof ideaId === "string" && !isNaN(Number(ideaId))
+        ? Number(ideaId)
+        : typeof ideaId === "number"
+        ? String(ideaId)
+        : ideaId;
+      if (coercedId !== ideaId) {
+        result = await collection.updateOne(
+          { $or: [{ ideaId: coercedId }, { id: coercedId }] },
+          {
+            $set: { ...updateSet, source: ideaSource },
+          }
+        );
+      }
+    }
+
     if (!shouldUpsert && result.matchedCount === 0) {
       return NextResponse.json(
         { error: "Idea not found in build list" },

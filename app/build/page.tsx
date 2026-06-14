@@ -37,18 +37,27 @@ const statusConfig = {
     icon: Circle,
     color: "bg-surface-raised",
     textColor: "text-ink",
+    activeBorder: "border-ink",
+    inactiveBorder: "border-ink",
+    inactiveColor: "bg-surface-inset",
   },
   building: {
     label: "Building",
     icon: Clock,
     color: "bg-copper",
     textColor: "text-white",
+    activeBorder: "border-ink",
+    inactiveBorder: "border-ink",
+    inactiveColor: "bg-surface-raised",
   },
   built: {
     label: "Shipped",
     icon: Rocket,
     color: "bg-sage",
     textColor: "text-white",
+    activeBorder: "border-ink",
+    inactiveBorder: "border-ink",
+    inactiveColor: "bg-surface-raised",
   },
 };
 
@@ -85,11 +94,26 @@ export default function BuildPage() {
   }, []);
 
   const updateStatus = async (ideaId: number, ideaSource: string | undefined, newStatus: string) => {
+    // Prevent clicks if ideaId is missing (corrupted data)
+    if (ideaId === undefined || ideaId === null) {
+      console.error("Cannot update status: ideaId is missing");
+      return;
+    }
     const now = Date.now();
     if (statusCooldownRef.current[ideaId] && now - statusCooldownRef.current[ideaId] < 1000) {
       return;
     }
     statusCooldownRef.current[ideaId] = now;
+
+    // Store old status for potential revert
+    const oldStatus = accepted.find((item) => item.ideaId === ideaId)?.status;
+
+    // Optimistic update
+    setAccepted((prev) =>
+      prev.map((item) =>
+        item.ideaId === ideaId ? { ...item, status: newStatus as any } : item
+      )
+    );
 
     try {
       const response = await fetch("/api/accept", {
@@ -103,16 +127,28 @@ export default function BuildPage() {
         }),
       });
       if (!response.ok) {
-        console.error("Failed to update status:", response.statusText);
+        const errorData = await response.json().catch(() => ({ error: response.statusText }));
+        console.error("Failed to update status:", errorData.error || response.statusText);
+        // Revert on failure
+        if (oldStatus) {
+          setAccepted((prev) =>
+            prev.map((item) =>
+              item.ideaId === ideaId ? { ...item, status: oldStatus as any } : item
+            )
+          );
+        }
         return;
       }
-      setAccepted((prev) =>
-        prev.map((item) =>
-          item.ideaId === ideaId ? { ...item, status: newStatus as any } : item
-        )
-      );
     } catch (e) {
       console.error("Failed to update status:", e);
+      // Revert on failure
+      if (oldStatus) {
+        setAccepted((prev) =>
+          prev.map((item) =>
+            item.ideaId === ideaId ? { ...item, status: oldStatus as any } : item
+          )
+        );
+      }
     }
   };
 
@@ -312,7 +348,7 @@ export default function BuildPage() {
                           </h3>
                         </div>
                         <button
-                          onClick={() => removeIdea(item.ideaId, item.source || item.idea.source)}
+                          onClick={() => removeIdea(item.ideaId, item.source || item.idea?.source)}
                           className="pixel-btn-ghost p-1 flex-shrink-0"
                           title="Remove from list"
                         >
@@ -357,11 +393,11 @@ export default function BuildPage() {
                             return (
                               <button
                                 key={statusKey}
-                                onClick={() => updateStatus(item.ideaId, item.source || item.idea.source, statusKey)}
+                                onClick={() => updateStatus(item.ideaId, item.source || item.idea?.source, statusKey)}
                                 className={`font-mono text-xs flex-1 flex items-center justify-center gap-1 py-2 rounded-btn border-[2px] transition-all duration-100 ${
                                   isActive
-                                    ? `${config.color} ${config.textColor} shadow-pixel-sm border-ink`
-                                    : "bg-surface-raised text-ink border-ink hover:bg-surface"
+                                    ? `${config.color} ${config.textColor} shadow-pixel-sm ${config.activeBorder}`
+                                    : `${config.inactiveColor || "bg-surface-raised"} text-ink ${config.inactiveBorder} hover:bg-surface`
                                 }`}
                               >
                                 <Icon className="w-3 h-3" />
@@ -374,7 +410,7 @@ export default function BuildPage() {
                         {/* Notes */}
                         <textarea
                           value={item.notes || ""}
-                          onChange={(e) => updateNotes(item.ideaId, item.source || item.idea.source, e.target.value)}
+                          onChange={(e) => updateNotes(item.ideaId, item.source || item.idea?.source, e.target.value)}
                           placeholder="Add notes, todos, ideas..."
                           className="pixel-input w-full text-xs min-h-[60px] resize-none"
                         />
