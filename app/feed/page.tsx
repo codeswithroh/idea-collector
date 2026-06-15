@@ -234,15 +234,16 @@ export default function FeedPage() {
               className="relative mx-auto"
               style={{ width: 380, perspective: "900px", transformStyle: "preserve-3d" }}
             >
-              {/* 3D Stack backs — portrait, same size, fanned in 3D */}
+              {/* 3D Stack backs — fanned below and behind */}
               {backIdeas.map((backIdea, idx) => {
-                const depth = backIdeas.length - idx;
-                const scale = 1 - depth * 0.035;
-                const translateY = depth * 8;
-                const opacity = 1 - depth * 0.25;
-                const rotateX = depth * 3;
-                const rotateY = (depth % 2 === 0 ? 1 : -1) * depth * 4;
-                const rotateZ = (depth % 2 === 0 ? -1 : 1) * depth * 2;
+                const depth = backIdeas.length - idx; // 1 = closest, 3 = furthest
+                const scale = 1 - depth * 0.05;
+                const translateY = depth * 18;
+                const translateX = (depth % 2 === 0 ? 1 : -1) * depth * 8;
+                const opacity = 1 - depth * 0.22;
+                const rotateX = -depth * 4;
+                const rotateY = (depth % 2 === 0 ? 1 : -1) * depth * 6;
+                const rotateZ = (depth % 2 === 0 ? -1 : 1) * depth * 3;
 
                 return (
                   <div
@@ -250,15 +251,15 @@ export default function FeedPage() {
                     className="absolute left-0 right-0 top-0 flex justify-center"
                     style={{
                       width: 380,
-                      transform: `scale(${scale}) translateY(-${translateY}px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) rotateZ(${rotateZ}deg)`,
-                      opacity: Math.max(opacity, 0.2),
+                      transform: `scale(${scale}) translateY(${translateY}px) translateX(${translateX}px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) rotateZ(${rotateZ}deg)`,
+                      opacity: Math.max(opacity, 0.25),
                       zIndex: -depth,
                       pointerEvents: "none",
                       transformStyle: "preserve-3d",
                     }}
                   >
-                    <div className="w-[380px] border-[2px] border-ink/30 rounded-card bg-surface-inset overflow-hidden shadow-pixel">
-                      <div className="h-[180px] bg-surface border-b-[2px] border-ink/30" />
+                    <div className="w-[380px] border-[2px] border-ink/35 rounded-card bg-surface-inset overflow-hidden shadow-pixel">
+                      <div className="h-[160px] bg-surface border-b-[2px] border-ink/35" />
                       <div className="p-4 space-y-2">
                         <div className="h-3 bg-surface-inset rounded-badge w-3/4" />
                         <div className="h-3 bg-surface-inset rounded-badge w-1/2" />

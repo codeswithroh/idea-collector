@@ -355,34 +355,27 @@ export default function IdeaCard({ idea, onAccept, onReject, onNext, onPrev }: I
           {/* Card */}
           <div className="w-[380px] border-[2px] border-ink rounded-card overflow-hidden shadow-pixel relative bg-surface-raised">
             {/* ===== HERO ===== */}
-            <div className="relative h-[200px] overflow-hidden" style={{ background: palette.gradient }}>
+            <div className="relative h-[180px] overflow-hidden" style={{ background: palette.gradient }}>
               {/* Subtle dot grid */}
               <div
-                className="absolute inset-0 opacity-20"
+                className="absolute inset-0 opacity-[0.15]"
                 style={{
-                  backgroundImage: "radial-gradient(circle, rgba(255,255,255,0.12) 1px, transparent 1px)",
-                  backgroundSize: "14px 14px",
-                }}
-              />
-              {/* Diagonal accent line */}
-              <div
-                className="absolute inset-0 opacity-10"
-                style={{
-                  background: `linear-gradient(135deg, transparent 40%, ${palette.accent} 40%, ${palette.accent} 41%, transparent 41%)`,
+                  backgroundImage: "radial-gradient(circle, rgba(255,255,255,0.15) 1px, transparent 1px)",
+                  backgroundSize: "16px 16px",
                 }}
               />
 
-              {/* Top badges */}
-              <div className="absolute top-3 left-3 right-3 flex items-start justify-between z-10">
-                <div className="flex flex-wrap gap-1.5">
-                  <span className="bg-white/10 backdrop-blur-md border border-white/20 px-2.5 py-1 rounded-badge font-mono text-[10px] font-bold text-white/90 uppercase tracking-wider">
+              {/* Top row — clean single row */}
+              <div className="absolute top-3 left-3 right-3 z-10 flex items-center justify-between">
+                <div className="flex items-center gap-1.5">
+                  <span className="bg-white/15 backdrop-blur-md border border-white/25 px-2.5 py-1 rounded-badge font-mono text-[10px] font-bold text-white/90 uppercase tracking-wider">
                     {idea.event}
                   </span>
-                  <span className="bg-white/10 backdrop-blur-md border border-white/20 px-2 py-0.5 rounded-badge font-mono text-[9px] font-bold text-white/70 uppercase">
+                  <span className="bg-white/15 backdrop-blur-md border border-white/25 px-2 py-0.5 rounded-badge font-mono text-[9px] font-bold text-white/70 uppercase">
                     {sourceLabel}
                   </span>
                   {hasPrizes && (
-                    <span className="bg-white/10 backdrop-blur-md border border-white/20 px-2 py-0.5 rounded-badge font-mono text-[9px] font-bold text-amber-300/90 uppercase flex items-center gap-1">
+                    <span className="bg-white/15 backdrop-blur-md border border-white/25 px-2 py-0.5 rounded-badge font-mono text-[9px] font-bold text-amber-300/90 uppercase flex items-center gap-1">
                       <Star className="w-2.5 h-2.5" />
                       {idea.project_prizes!.length}
                     </span>
@@ -392,15 +385,15 @@ export default function IdeaCard({ idea, onAccept, onReject, onNext, onPrev }: I
                   href={idea.url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="w-7 h-7 bg-white/10 backdrop-blur-md border border-white/20 rounded-badge flex items-center justify-center hover:bg-white/20 transition-colors shrink-0"
+                  className="w-7 h-7 bg-white/15 backdrop-blur-md border border-white/25 rounded-badge flex items-center justify-center hover:bg-white/25 transition-colors shrink-0"
                   onClick={(e) => e.stopPropagation()}
                 >
                   <ArrowUpRight className="w-3.5 h-3.5 text-white/80" />
                 </a>
               </div>
 
-              {/* Bottom fade */}
-              <div className="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-surface-raised to-transparent" />
+              {/* Bottom fade into body */}
+              <div className="absolute bottom-0 left-0 right-0 h-20 bg-gradient-to-t from-surface-raised via-surface-raised/80 to-transparent" />
             </div>
 
             {/* ===== BODY ===== */}
